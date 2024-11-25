@@ -63,8 +63,18 @@ class Ball {
         return y;
     }
 
-    // Setters that you need go here - by default, only colors
+    /* Randomizes colors with Math.random(),
+    * setting a random value for r,g, and b 
+    * Randomization from: https://www.w3schools.com/java/java_howto_random_number.asp 
+    */
+    public int randomColor() {
+        int r = (int) (Math.random() * 255);
+        int g = (int) (Math.random() * 255);
+        int b = (int) (Math.random() * 255);
+        return s.color(r, g, b);  
+    }
 
+    // Setters that you need go here - by default, only colors
     public void setColors(int fill, int border) {
         borderColor = border;
         fillColor = fill;
@@ -79,18 +89,63 @@ class Ball {
         s.circle(x, y, radius * 2);
     }
 
+    /* Tracks if the ball is frozen */
+    boolean isFrozen = false; 
+
     /**
-     * Moves the ball so that the next time it draws it will be in a different place
+     *  Sets frozen state of the ball, if frozen = true,
+     * it will not move */
+    public void frozen(boolean state) {
+        isFrozen = state;
+    }
+
+     /**
+     * Moves the ball so that the next time it draws it will be in a different place, 
+     * unless it is frozen
      */
     public void move() {
-        x = x + xSpeed;
-        y = y + ySpeed;
-        if (x > s.width - radius || x < radius) {
-            xSpeed = -xSpeed;
+        if (!isFrozen) {
+            x = x + xSpeed;
+            y = y + ySpeed;
+            
+            if (x > s.width - radius || x < radius) {
+                xSpeed = -xSpeed;
+            }
+            if (y > s.height - radius || y < radius) {
+                ySpeed = -ySpeed;
+            }
         }
-        if (y > s.height - radius || y < radius) {
-            ySpeed = -ySpeed;
+
+        /**
+        * Checks if mouse is within ball radius so that if it is,
+        * it freeses and changes colors randomly.
+        * Unfreezes when mouse is away from ball area.
+        */
+        if (Sketch.dist(s.mouseX, s.mouseY, x, y) < radius) {
+            frozen(true);
+            setColors(randomColor(), randomColor());
+        } else {
+            frozen(false);
         }
     }
 
+    /* 
+     * sets that when mouse is pressed inside the ball's area
+     * the balls freezes and randomizes its colors 
+     * From: https://processing.org/reference/mousePressed_.html
+     */
+    public void mousePressed() {
+        if (Sketch.dist(s.mouseX, s.mouseY, x, y) < radius) {
+            frozen(true); 
+            setColors(randomColor(), randomColor());
+        }
+    }
+
+    /* 
+     * sets that when mouse is released, it does not freeze. 
+     * From: https://processing.org/reference/mouseReleased_.html
+     */
+    public void mouseReleased() {
+        frozen(false); 
+    }
 }
